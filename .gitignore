@@ -1,0 +1,14 @@
+# Node modules
+node_modules/
+
+# Env (kalau kamu pakai file environment)
+.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System files (Windows / general)
+.DS_Store
+Thumbs.db
