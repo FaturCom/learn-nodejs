@@ -49,7 +49,7 @@ app.post('/users', async(req, res) => {
 
     for(const field of allowedFields) if(!newUserFields.includes(field)) return res.status(400).json({error: "bad request", message: `missing field: ${field}`});
 
-    if(typeof newUser.name !== "string" || typeof newUser.role !== "string" || typeof newUser.age !== "number" )res.status(400).json({error: "bad request", message: "Wrong data type for one or more fields"})    
+    if(typeof newUser.name !== "string" || typeof newUser.role !== "string" || typeof newUser.age !== "number" ) return res.status(400).json({error: "bad request", message: "Wrong data type for one or more fields"})    
         
     const findUser = await users.findOne({name: newUser.name});
     if(findUser) return res.status(400).json({error: "user exists", message: "a user with this name already exists"});
