@@ -52,7 +52,7 @@ app.post('/users', async(req, res) => {
     if(typeof newUser.name !== "string" || typeof newUser.role !== "string" || typeof newUser.age !== "number" ) return res.status(400).json({error: "bad request", message: "Wrong data type for one or more fields"})    
         
     const findUser = await users.findOne({name: newUser.name});
-    if(findUser) return res.status(400).json({error: "user exists", message: "a user with this name already exists"});
+    if(findUser) return res.status(409).json({error: "user exists", message: "a user with this name already exists"});
     await users.insertOne(newUser);
     const result = await users.findOne({name: newUser.name});
     res.status(201).json({message: "user created successfully", user: result});
