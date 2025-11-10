@@ -2,6 +2,7 @@ import express from 'express'
 import {MongoClient} from 'mongodb'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import util from 'util'
 
 const app = express();
 const port = 3000;
@@ -16,30 +17,40 @@ const users = db.collection('users')
 const SALT_ROUNDS = 10
 const SECRET_KEY = "MY_SECRET_123"
 
+async function verifyToken(req, res, next){
+    try{
+        const token = req.headers.authorization?.split(" ")[1]
+
+        if(!token) return res.status(401).json({ message: "Missing token" })
+        
+        const verfyAsync = util.promisify(jwt.verify)
+        const decode = await verfyAsync(token, SECRET_KEY)
+
+        req.user = decode
+        next()
+    }catch(err){
+        return res.status(403).json({ message: "Invalid token" })
+    }
+}
+
+function isAdmin(req, res, next){
+    if(req.user.role !== "admin"){
+        return res.status(403).json({ message: "Forbidden. Admin only." });
+    }
+
+    next();
+}
+
 app.get('/', (req, res) => {
     res.send("welcome to auth api and JWT")
 })
 
 app.get('/users', async(req, res, next) => {
     try {
-        const allUser = await users.find({}).toArray()
+        const allUser = await users.find({role: "user"}).toArray()
         res.json(allUser)
     } catch (err) {
         next(err)
-    }
-})
-
-app.get('/profile', async(req, res, next) => {
-    const authHeader = req.headers.authorization
-    if(!authHeader) return res.status(401).json({error: "missing token"})
-    
-    const token = authHeader.split(" ")[1]
-
-    try {
-        const user = jwt.verify(token, SECRET_KEY)
-        return res.json({message: "this is your profile", user})
-    } catch (err) {
-        return res.status(401).json({error: "invalid token"})
     }
 })
 
@@ -59,7 +70,7 @@ app.post('/login', async(req, res, next) => {
         const valid = await bcrypt.compare(userLogin.password, user.password)
         if(!valid) return res.status(401).json({error: "unauthorized", message: "wrong password"})
         const token = jwt.sign(
-            {username: user.username},
+            {username: user.username, role: user.role},
             SECRET_KEY,
             {expiresIn: "1h"}
         )
@@ -85,7 +96,7 @@ app.post('/register', async(req, res, next) => {
         if(userRegist.password !== userRegist.confirmPassword) return res.status(400).json({error: "bad request", message: "password and confirm password do not match"})
         
         const passwordHash = await bcrypt.hash(userRegist.password, SALT_ROUNDS)
-        await users.insertOne({username: userRegist.username, password: passwordHash})
+        await users.insertOne({username: userRegist.username, password: passwordHash, role: "user"})
         res.status(201).json({message: "user created successfully"})
         
     } catch (err) {
@@ -93,8 +104,9 @@ app.post('/register', async(req, res, next) => {
     }
 })
 
-app.delete('/user/:username', async(req, res, next) => {
+app.delete('/user/:username',verifyToken, isAdmin, async(req, res, next) => {
     try {
+        
         const username = req.params.username
         const findUser = await users.findOne({username})
 
