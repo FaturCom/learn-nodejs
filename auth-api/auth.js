@@ -3,19 +3,22 @@ import {MongoClient} from 'mongodb'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import util from 'util'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 app.use(express.json());
 
-const url = "mongodb://localhost:27017";
+const url = process.env.MONGO_URL;
 const client = new MongoClient(url)
 await client.connect()
 const db = client.db('authdb')
 const users = db.collection('users')
 
 const SALT_ROUNDS = 10
-const SECRET_KEY = "MY_SECRET_123"
+const SECRET_KEY = process.env.JWT_SECRET
 
 async function verifyToken(req, res, next){
     try{
