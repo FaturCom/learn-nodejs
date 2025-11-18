@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/css/reset.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <section class="page-center auth-section" id="login">
+        <div class="card">
+            <div class="card-header">
+                <div class="logo" aria-hidden="true"></div>
+                <div>
+                    <h1>Welcome Back</h1>
+                    <p class="lead">Sign in to continue to your notes.</p>
+                </div>
+            </div>
+
+            <form novalidate>
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input type="email" name="email" id="email" required>
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password" required>
+                </div>
+
+                <div class="row">
+                    <button class="btn btn-primary" type="submit">Login</button>
+                </div>
+
+                <p class="small text-center" style="margin-top:12px">Don't have an account? <a href="register.html">Register</a></p>
+            </form>
+        </div>
+    </section>
+
+    <script src="/js/login.js"></script>
+</body>
+</html>

@@ -16,23 +16,44 @@ const client = new MongoClient(url)
 await client.connect()
 const db = client.db('authdb')
 const users = db.collection('users')
+const tokenCollection = db.collection('token') 
 
 const SALT_ROUNDS = 10
-const SECRET_KEY = process.env.JWT_SECRET
+const refreshSecretKey = process.env.JWT_REFRESH
+const accessSecretkey = process.env.JWT_ACCESS
 
-async function verifyToken(req, res, next){
+async function verifyRefreshToken(req, res, next) {
+    try {
+        const token = req.body.token
+
+        if(!token) return res.status(401).json({ message: "Missing token" })
+
+        const findToken = await tokenCollection.findOne({token})
+        if(!findToken) return res.status(403).json({ message: "Refresh token not found"});
+        
+        const verfyAsync = util.promisify(jwt.verify)
+        const decode = await verfyAsync(token, refreshSecretKey)
+
+        req.user = decode
+        next()
+    } catch (err) {
+        return res.status(403).json({ message: "Invalid refresh token" })
+    }
+}
+
+async function verifyAccessToken(req, res, next){
     try{
         const token = req.headers.authorization?.split(" ")[1]
 
         if(!token) return res.status(401).json({ message: "Missing token" })
         
         const verfyAsync = util.promisify(jwt.verify)
-        const decode = await verfyAsync(token, SECRET_KEY)
+        const decode = await verfyAsync(token, accessSecretkey)
 
         req.user = decode
         next()
     }catch(err){
-        return res.status(403).json({ message: "Invalid token" })
+        return res.status(403).json({ message: "Invalid access token" })
     }
 }
 
@@ -40,12 +61,27 @@ function isAdmin(req, res, next){
     if(req.user.role !== "admin"){
         return res.status(403).json({ message: "Forbidden. Admin only." });
     }
-
+    
     next();
 }
 
 app.get('/', (req, res) => {
     res.send("welcome to auth api and JWT")
+})
+
+app.get('/refresh', verifyRefreshToken, async(req, res, next) => {
+    try {
+        const user = req.user
+        const newAccessToken = jwt.sign(
+            {username: user.username, role: user.role},
+            accessSecretkey,
+            {expiresIn: "10m"}
+        )
+
+        res.json({message: "created new token success", token: newAccessToken})
+    } catch (err) {
+        next(err)
+    }
 })
 
 app.get('/users', async(req, res, next) => {
@@ -72,12 +108,23 @@ app.post('/login', async(req, res, next) => {
         
         const valid = await bcrypt.compare(userLogin.password, user.password)
         if(!valid) return res.status(401).json({error: "unauthorized", message: "wrong password"})
-        const token = jwt.sign(
+        const accessToken = jwt.sign(
             {username: user.username, role: user.role},
-            SECRET_KEY,
-            {expiresIn: "1h"}
+            accessSecretkey,
+            {expiresIn: "10m"}
         )
-        res.json({message: "login success", token})
+        const refreshToken = jwt.sign(
+            {username: user.username, role: user.role},
+            refreshSecretKey,
+            {expiresIn: "7d"}
+        )
+        await tokenCollection.deleteMany({username: user.username})
+        await tokenCollection.insertOne({
+            token: refreshToken,
+            username: user.username,
+            createdAt: new Date()
+        })
+        res.json({message: "login success", accessToken, refreshToken})
 
     } catch (err) {
         next(err)
@@ -107,7 +154,7 @@ app.post('/register', async(req, res, next) => {
     }
 })
 
-app.delete('/user/:username',verifyToken, isAdmin, async(req, res, next) => {
+app.delete('/user/:username',verifyAccessToken, isAdmin, async(req, res, next) => {
     try {
         
         const username = req.params.username

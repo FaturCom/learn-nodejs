@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notes Dashboard</title>
+    <link rel="stylesheet" href="/css/reset.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <header class="app-header">
+            <h1>Your Notes</h1>
+            <button id="logoutBtn" class="btn btn-ghost">Logout</button>
+        </header>
+
+        <section id="create-note-section" class="card">
+            <h2 class="small muted">Create New Note</h2>
+            <form id="createNoteForm">
+                <div class="field">
+                    <label for="title" class="small muted">Title</label>
+                    <input class="" type="text" id="title" placeholder="Note title" required>
+                </div>
+                <div class="field">
+                    <label for="content" class="small muted">Content</label>
+                    <textarea id="content" placeholder="Note content" required></textarea>
+                </div>
+
+                <div class="row">
+                    <button id="submitBtn" class="btn btn-primary" type="submit">Add Note</button>
+                    <button id="cancelBtn" class="btn btn-ghost" type="button" style="display:none;">Cancel</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="notes-section">
+            <h2 class="small muted">Your Notes</h2>
+            <div id="notesList" class="notes-grid">
+                <!-- Notes will be inserted here by JS -->
+            </div>
+        </section>
+    </div>
+
+    <script src="/js/note.js"></script>
+</body>
+</html>

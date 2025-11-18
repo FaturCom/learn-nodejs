@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes api</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+
+            const accessToken = localStorage.getItem("accessToken");
+
+            if (!accessToken) {
+                const newToken = await tryRefreshToken();
+                if (newToken) {
+                    localStorage.setItem("accessToken", newToken);
+                    return window.location.href = "./pages/note.html";
+                } else {
+                    return window.location.href = "./pages/login.html";
+                }
+            }
+
+            const test = await fetch("http://localhost:3000/notes", {
+                headers: {
+                    "Authorization": "Bearer " + accessToken
+                }
+            });
+
+        
+            if (test.ok) {
+                return window.location.href = "./pages/note.html";
+            }
+
+            const newToken = await tryRefreshToken();
+            if (newToken) {
+                localStorage.setItem("accessToken", newToken);
+                return window.location.href = "./pages/note.html";
+            }
+
+            localStorage.clear();
+            window.location.href = "./pages/login.html";
+        });
+
+
+        async function tryRefreshToken() {
+            try {
+                const res = await fetch("http://localhost:3000/auth/refresh", {
+                    method: "POST",
+                    credentials: "include"
+                });
+
+                if (!res.ok) return null;
+
+                const data = await res.json();
+                return data.accessToken;
+
+            } catch (err) {
+                return null;
+            }
+        }
+
+    </script>
+</head>
+<body>
+    <p>checking...</p>
+</body>
+</html>

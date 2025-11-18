@@ -1,0 +1,123 @@
+/*
+  Unified modern minimal stylesheet (dark professional theme)
+  Applies across auth pages and dashboard (login, register, note)
+  - Keep reset in `reset.css`; this file focuses on layout & components
+*/
+
+:root{
+  --bg:  #071022; /* page base */
+  --surface: rgba(255,255,255,0.02);
+  --muted: #9aa8bb;
+  --text: #e6eef8;
+  --accent: #6ee7b7;
+  --accent-2: #60a5fa;
+  --border: rgba(255,255,255,0.06);
+  --focus: rgba(96,165,250,0.12);
+  --card-radius: 12px;
+  --gap: 18px;
+  --max-width: 1100px;
+}
+
+/* Base typography & background */
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color:var(--text);
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(600px 400px at 6% 8%, rgba(96,165,250,0.05) 0%, transparent 18%),
+    radial-gradient(520px 320px at 92% 84%, rgba(110,231,183,0.035) 0%, transparent 16%),
+    linear-gradient(180deg, rgba(11,18,32,0.55), rgba(7,16,35,0.95));
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+  padding:36px 20px;
+}
+
+/* Layout container */
+.container{
+  max-width:var(--max-width);
+  margin:0 auto;
+  display:block;
+  padding:0 18px;
+}
+
+/* Center helpers for auth pages */
+.page-center{min-height:calc(100vh - 72px);display:flex;align-items:center;justify-content:center}
+
+/* Card (used widely for auth and create-note) */
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid var(--border);
+  padding:22px;border-radius:var(--card-radius);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+}
+
+.card-header{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+.logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 6px 22px rgba(96,165,250,0.09)}
+.card h1{font-size:20px;margin:0}
+.lead{color:var(--muted);font-size:13px;margin:2px 0 0}
+
+/* Forms */
+.field{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+label{font-size:13px;color:var(--muted)}
+input[type=text], input[type=email], input[type=password], textarea, select{
+  background:transparent;border:1px solid var(--border);padding:12px 14px;color:var(--text);border-radius:10px;outline:none;transition:box-shadow .15s ease,border-color .12s ease
+}
+textarea{min-height:110px}
+input:hover{border-color:rgba(255,255,255,0.12)}
+input:focus, textarea:focus, select:focus{box-shadow:0 8px 28px var(--focus);border-color:rgba(96,165,250,0.65)}
+
+.helper{font-size:12px;color:var(--muted)}
+.error{color:#ff8b8b;font-size:12px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:10px;border:1px solid transparent;cursor:pointer;font-weight:600;font-size:14px;transition:transform .06s ease,box-shadow .12s ease}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.6;cursor:not-allowed}
+.btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#042027;border:none;box-shadow:0 10px 30px rgba(96,165,250,0.08)}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+
+/* App header for dashboard */
+.app-header{display:flex;align-items:center;justify-content:space-between;margin:8px 0 18px}
+.app-header h1{font-size:20px;margin:0}
+
+/* Dashboard layout: two-column on wide screens */
+.dashboard{
+  display:grid;grid-template-columns:360px 1fr;gap:24px;align-items:start
+}
+
+/* Notes grid */
+.notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:12px}
+.note-card{background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.008));border:1px solid var(--border);padding:14px;border-radius:10px;min-height:120px;display:flex;flex-direction:column}
+.note-card h3{margin:0 0 6px;font-size:15px}
+.note-card p{margin:0;color:var(--muted);flex:1}
+.note-card .note-actions{display:flex;gap:8px;margin-top:12px}
+.note-card .note-actions button{font-size:13px;padding:8px 10px;border-radius:8px}
+.note-card .btn-delete{background:#ff5f5f;color:white;border:none}
+.note-card .btn-edit{background:transparent;border:1px solid var(--border);color:var(--text)}
+
+/* Create note adjustments */
+#create-note-section.card{padding:18px}
+#create-note-section .field input, #create-note-section .field textarea{background:transparent}
+
+/* Small screens: stack single column and use dashboard grid as column */
+@media (max-width:900px){
+  .dashboard{display:block}
+  .notes-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+  .container{padding:0 12px}
+}
+
+/* Accessibility focus outlines */
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:3px solid rgba(96,165,250,0.12);outline-offset:3px}
+
+/* Subtle pop animation for cards */
+@keyframes popIn{from{opacity:0;transform:translateY(6px) scale(.996)}to{opacity:1;transform:none}}
+.card, .note-card{animation:popIn .28s cubic-bezier(.2,.9,.3,1)}
+
+/* Developer notes: if you prefer a lighter theme, tell me and I'll add alternatives as commented snippets. */
+
